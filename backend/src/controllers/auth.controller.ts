@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { registerService } from "../services/auth.service";
+import { registerService, loginServce } from "../services/auth.service";
 
 export const registerController = async (req : Request, res : Response) => {
     try{
@@ -25,13 +25,16 @@ export const loginController = async ( req : Request , res : Response) =>{
     try{
         const {email,password} = req.body
 
-        if(!email || !password){
-            res.status(400).json({message:'Email and password is required'})
-            return 
+        if (!email || !password) {
+            res.status(400).json({ message: 'Email and password is required' })
+            return
         }
+
+        const user = await loginServce(email, password)
+        res.status(200).json(user)
     }
         catch (error:any){
             res.status(401).json({message:error.message})
         }
     
-}
+    } 

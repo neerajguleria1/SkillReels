@@ -1,8 +1,6 @@
-
+import jwt from 'jsonwebtoken'
 import { prisma } from "../lib/prisma";
 import bcrypt from 'bcrypt'
-
-
 
 export async function hash_Password(password : string) : Promise<string> {
     const saltRounds = 10;
@@ -40,13 +38,31 @@ export async function authenticate_User(email : string, password :string){
     const isValid = await verif_Password(password , user.password)
     return isValid ? user : null
 }
-
+ 
 export async function registerService(email : string, password : string, name? : string){
     const existing_user = await findUserBy_Mail(email);
     if (existing_user) {
         throw new Error("user already exists");
     }
     return await create_User(email, password, name);
-
 }
+
+export async function loginServce(email : string, password : string){
+    const user = await authenticate_User(email, password)
+    if(!user){
+        throw new Error('Ivalid email or password')
+    }
+    const {password : _ , ...safeUser} = user
+
+    const token = jwt.sign(
+        {id:safeUser.id, role:safeUser.role},
+        process.env.JWT_SECRET as string,
+        {expiresIn:'1h'}
+    )
+   // console.log('token:', token)
+    return {user:safeUser, token}
+    
+}
+
+
 
