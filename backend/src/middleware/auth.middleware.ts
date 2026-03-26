@@ -21,3 +21,14 @@ export const authMiddleware = (req: AuthenticatedRequest, res: Response, next: N
     res.status(401).json({ error: 'Invalid token.' });
   }
 };
+
+export const roleMiddleware = (roles: string[]) => {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+    if (!roles.includes(req.user.role)) {
+      res.status(403).json({ error: 'Access denied. Insufficient permissions.' })
+      return
+    }
+    next()
+  }
+}
+
